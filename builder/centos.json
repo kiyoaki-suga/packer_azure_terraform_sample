@@ -1,0 +1,51 @@
+{
+  "variables": {
+    "client_id": "",
+    "client_secret": "",
+    "subscription_id": "",
+    "tenant_id": ""
+  },
+  "builders": [
+    {
+      "type": "azure-arm",
+
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "subscription_id": "{{user `subscription_id`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+
+      "managed_image_resource_group_name": "tf_test_01_rg",
+      "managed_image_name": "centos74tfimage",
+
+      "image_publisher": "OpenLogic",
+      "image_offer": "CentOS",
+      "image_sku": "7.4",
+
+      "location": "Japan West",
+      "vm_size": "Standard_D1_v2",
+      "os_type": "Linux"
+  }
+],
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "../script/centos/provision.sh"
+      ]
+    },
+  {
+      "type": "ansible-local",
+      "playbook_file": "../ansible/baseimage.yml",
+      "inventory_file": "../ansible/hosts",
+      "role_paths": [
+      "../ansible/roles/baseimage"
+    ]
+  },
+  {
+      "type": "shell",
+      "scripts": [
+        "../script/centos/deprovision.sh"
+      ]
+  }
+  ]
+}
