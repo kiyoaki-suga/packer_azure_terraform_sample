@@ -1,0 +1,79 @@
+- selinux:
+    policy: targeted
+    state: permissive
+
+- name: Japanese Env Install
+  command: yum -y install ibus-kkc vlgothic-*
+
+- name: Tool Install
+  command: yum -y install tree mlocate
+
+- name: set timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo
+
+- name: change locale
+  command: localectl set-locale LANG=ja_JP.UTF-8
+
+- name: Keyboad
+  command: localectl set-keymap jp106
+
+- name: create user
+  user:
+    name: "{{ item.name }}"
+    createhome: yes
+    password: "{{ item.password | password_hash('sha512') }}"
+    shell: /usr/bin/bash
+    groups: wheel
+    state: present
+  with_items:
+  - { name: 'deploy', password: '############' }
+
+- name: Directory existence check
+  stat: path=/home/deploy/modules
+  register: fm
+
+- file: path=/home/deploy/modules state=directory owner=deploy group=deploy mode=0755
+  when: not fm.stat.exists
+
+- name: Directory existence check
+  stat: path=/home/deploy/modules/computegroup
+  register: fm
+
+- file: path=/home/deploy/modules/computegroup state=directory owner=deploy group=deploy mode=0755
+  when: not fm.stat.exists
+
+- name: Directory existence check
+  stat: path=/home/deploy/modules/computegroup/os
+  register: fm
+
+- file: path=/home/deploy/modules/computegroup/os state=directory owner=deploy group=deploy mode=0755
+  when: not fm.stat.exists
+  
+
+- name: Directory existence check
+  stat: path=/home/deploy/modules/loadbalancer
+  register: fm
+
+- file: path=/home/deploy/modules/loadbalancer state=directory owner=deploy group=deploy mode=0755
+  when: not fm.stat.exists
+
+- name: Directory existence check
+  stat: path=/home/deploy/modules/network
+  register: fm
+
+- file: path=/home/deploy/modules/network state=directory owner=deploy group=deploy mode=0755
+  when: not fm.stat.exists
+
+- name: Directory existence check
+  stat: path=/home/deploy/modules/database
+  register: fm
+
+- file: path=/home/deploy/modules/database state=directory owner=deploy group=deploy mode=0755
+  when: not fm.stat.exists
+  
+- name: Terraform Download and Unzip
+  unarchive:
+    src: https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: true
